@@ -45,7 +45,7 @@ Este é um simples sistema de contatos desenvolvido como parte do desafio para a
 1. Clone este repositório:
 
    ```bash
-   git clone https://github.com/ricaelchiquetti/magazord-backend-test.git
+   git clone https://github.com/ricaelchiquetti/controle_contatos.git
    ```
 
 2. Instale as dependências do Composer:
