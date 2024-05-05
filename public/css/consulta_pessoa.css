@@ -1,0 +1,70 @@
+:root {
+    --cor-fundo: #333438;
+    --cor-letra: #e8e8e8;
+    --cor-borda: #e8e8e8;
+}
+
+.linha-pessoa.selecionada {
+    background-color: #7a7a7a;
+    color: white;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-letra);
+}
+
+.input-group,
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer {
+    background-color: var(--cor-fundo);
+}
+
+.form-control,
+.btn {
+    background-color: var(--cor-fundo);
+    color: var(--cor-letra);
+    border-color: var(--cor-borda);
+}
+
+.table {
+    background-color: var(--cor-fundo);
+    color: var(--cor-letra);
+}
+
+.table th,
+.table td {
+    border-color: var(--cor-borda);
+}
+
+.modal-content {
+    border-color: var(--cor-borda);
+}
+
+.btn:focus,
+.form-control:focus {
+    background-color: var(--cor-fundo);
+    color: var(--cor-letra);
+    border-color: var(--cor-borda);
+}
+
+.btn:focus:not(:focus-visible),
+.form-control:focus:not(:focus-visible) {
+    box-shadow: none;
+}
+
+.btn:active,
+.form-control:active {
+    background-color: var(--cor-fundo);
+    color: var(--cor-letra);
+    border-color: var(--cor-borda);
+}
+
+.alertas {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}

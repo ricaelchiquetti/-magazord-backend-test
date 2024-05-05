@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "MagaDocker",
+            "database": "maga_project",
+            "username": "user",
+            "password": "21041998"
+        }
+    ]
+}

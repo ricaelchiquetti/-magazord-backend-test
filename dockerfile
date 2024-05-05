@@ -1,33 +1,50 @@
-# Estágio 1: Construindo a aplicação PHP
-FROM php:8.2-cli AS builder
+# Estágio 1: Instalando PHP e Composer
+FROM php:8.3-apache AS php_installer
 
-# Copie o código-fonte da aplicação para dentro do contêiner
-COPY -magazord-backend-test /usr/src/magazord-backend
-
-# Defina o diretório de trabalho
-WORKDIR /usr/src/magazord-backend
-
-# Instale as dependências da aplicação usando o Composer
+# Instalação do Composer
 RUN apt-get update && apt-get install -y \
     curl \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer install
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Instale as extensões PHP necessárias
-RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+# Estágio 2: Construindo a aplicação PHP
+FROM php_installer AS builder
+WORKDIR /usr/src/magazord-backend
+COPY . .
 
-# Configurar o Xdebug
-RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/php.ini \
-    && echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/php.ini \
-    && echo "xdebug.remote_host=host.docker.internal" >> /usr/local/etc/php/php.ini \
-    && echo "xdebug.remote_port=9000" >> /usr/local/etc/php/php.ini
+# Instalação de pacotes adicionais necessários para a aplicação
+RUN apt-get update \
+    && apt-get install -y \
+    zip \
+    unzip \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Estágio 2: Preparando o banco de dados PostgreSQL
-FROM postgres:latest
+# Definindo a variável de ambiente para permitir a execução do Composer como superusuário
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Copie o arquivo SQL do primeiro estágio para o contêiner PostgreSQL
-COPY --from=builder /usr/src/magazord-backend/database/create_tables.sql /docker-entrypoint-initdb.d/
+# Instalação das dependências do Composer
+RUN composer install
 
-# Defina as permissões adequadas para o arquivo SQL
-RUN chmod +x /docker-entrypoint-initdb.d/create_tables.sql
+# Estágio 3: Preparando o banco de dados PostgreSQL
+FROM postgres:latest AS postgres_setup
+COPY --from=builder /usr/src/magazord-backend/database/migrations/create_tables.sql /docker-entrypoint-initdb.d/
+
+# Estágio 4: Configurando o servidor PHP
+FROM php_installer AS php_server
+COPY --from=builder /usr/src/magazord-backend /var/www/html
+WORKDIR /var/www/html
+
+# Instalação do driver PDO para PostgreSQL
+RUN apt-get update \
+    && apt-get install -y libpq-dev \
+    && docker-php-ext-install pgsql pdo_pgsql pdo
+
+# Instalando o Xdebug
+RUN pecl install xdebug
+RUN docker-php-ext-enable xdebug \
+    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini 
+
+# Comando padrão para iniciar o servidor PHP
+CMD ["php", "-S", "0.0.0.0:80", "-t", "/var/www/html"]
