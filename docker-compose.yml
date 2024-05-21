@@ -19,7 +19,7 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: 21041998
+      POSTGRES_PASSWORD: 
       POSTGRES_DB: maga_project
     ports:
       - "5432:5432"
